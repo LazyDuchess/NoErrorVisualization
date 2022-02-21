@@ -1,0 +1,3 @@
+[submodule "NoErrorVisualization/LDLibraries"]
+	path = NoErrorVisualization/LDLibraries
+	url = https://github.com/LazyDuchess/LDLibraries
