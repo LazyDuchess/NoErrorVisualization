@@ -1,5 +1,19 @@
 // dllmain.cpp : Defines the entry point for the DLL application.
 #include "pch.h"
+#include "hooking.h"
+#include <Psapi.h>
+#define FLASHING_ADDR 0xBC886B
+
+char jmpCode[] = { 0xEB };
+
+DWORD WINAPI MainThread(LPVOID param)
+{
+    HMODULE module = GetModuleHandleA(NULL);
+    char* modBase = (char*)module;
+    Hooking::WriteToMemory((DWORD)modBase + FLASHING_ADDR, jmpCode, sizeof(jmpCode) / sizeof(*jmpCode));
+    FreeLibraryAndExitThread((HMODULE)param, 0);
+    return 0;
+}
 
 BOOL APIENTRY DllMain( HMODULE hModule,
                        DWORD  ul_reason_for_call,
@@ -9,6 +23,8 @@ BOOL APIENTRY DllMain( HMODULE hModule,
     switch (ul_reason_for_call)
     {
     case DLL_PROCESS_ATTACH:
+        CreateThread(0, 0, MainThread, hModule, 0, 0);
+        break;
     case DLL_THREAD_ATTACH:
     case DLL_THREAD_DETACH:
     case DLL_PROCESS_DETACH:
